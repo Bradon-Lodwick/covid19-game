@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+
+<link href="https://stackpath.bootstrapcdn.com/bootswatch/4.4.1/cerulean/bootstrap.min.css" rel="stylesheet" integrity="sha384-LV/SIoc08vbV9CCeAwiz7RJZMI5YntsH8rGov0Y2nysmepqMWVvJqds6y0RaxIXT" crossorigin="anonymous">
+<script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+<script type="text/javascript" charset="utf-8">
+	var User = "Todd";
+	var socket = io();
+	socket.on('connect', function() {});
+	
+	socket.on('disconnect', function() {});
+	
+	socket.on('turn_update', function(data) {
+		console.log(data['msg']);
+		
+		if(data['state'] == '0'){
+			console.log('hurray');
+			disableButtons(false);
+		}
+		
+		document.getElementById('turn_dialog').innerHTML = data['msg'];
+	});
+	
+	socket.on('score_update', function(data) {
+		console.log(data['score']);
+		document.getElementById('score_dialog').innerHTML = "Score: " + data['score'];
+	});
+</script>
+
+<script>
+function join(){
+	User = document.getElementById('user_field').value;
+	
+	document.getElementById('user_field').disabled = true;
+	document.getElementById('submit_button').disabled = true;
+	
+	socket.emit('joined', {msg: 'I\'m here boi!', username: User});
+}
+function sendMessage(){
+	socket.emit('message', {msg: 'Button Clicked', username: User});
+	console.log("clicked button");
+}
+
+function sendTrigger(points_taken){
+	socket.emit('trigger', {msg: 'Trigger Clicked', username: User, points: points_taken});
+	console.log("clicked button");
+	disableButtons(true);
+	document.getElementById('turn_dialog').innerHTML = "NOT YOUR TURN!";
+}
+</script>
+<script>
+function disableButtons(enable){
+	var buttons = document.getElementsByClassName('trigger_button');
+	for(var i = 0; i < buttons.length; i++){
+		buttons[i].disabled = enable;
+	}
+}
+</script>
+<html>
+	<header>
+		<meta charset="utf-8"/>
+	</header>
+
+	<body onload="disableButtons(true)">
+		Username: <input type="text" id="user_field"/>
+		<button onClick="join()" id="submit_button">Submit</button>
+		<br/>
+		<div class="row">
+			<button type="button" class="col-sm-6 btn btn-primary trigger_button" disabled="" onclick="sendTrigger(1)">Take 1</button>
+			<button type="button" class="col-sm-6 btn btn-warning trigger_button" disabled="" onclick="sendTrigger(2)">Take 2</button>
+		</div>	
+		<div class="row">
+			<button type="button" class="col-sm-6 btn btn-danger trigger_button" disabled="" onclick="sendTrigger(3)">Take 3</button>
+			<button type="button" class="col-sm-6 btn btn-secondary trigger_button" disabled="" onclick="sendTrigger(0)">Pass</button>
+		</div>
+		<br/>
+		<h1 id="turn_dialog">
+			NOT YOUR TURN
+		</h1>
+		<h2 id="score_dialog">
+			0
+		</h2>
+	</body>
+</html>
+

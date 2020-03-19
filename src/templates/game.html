@@ -1,0 +1,81 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}{{ username }} connected{% endblock %}
+
+{% block content %}
+<audio id="notification-tone">
+    <source src="{{ url_for('static', filename='tone.mp3') }}" type="audio/mpeg">
+</audio>
+
+<div class="container">
+    <p style="display:inline;">Turn Player: </p><p style="display:inline;" id="turn-player">Loading...</p>
+    <div id="play-area">
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+<script type="text/javascript">
+let notificationTone = document.getElementById("notification-tone");
+let playArea = $("#play-area");
+let turnPlayerArea = $("#turn-player");
+let username = "{{ username }}";
+
+let socket = io();
+socket.on('connect', function() {
+    socket.emit('joined', {msg: 'I\'m here boi!', username: username});
+});
+
+socket.on('disconnect', function() {
+    socket.emit('left', {msg: 'Peace out boi!', username: username});
+});
+
+socket.on('turn_update', function(data) {
+    let turnPlayer = data.username;
+    changeTurnPlayer(turnPlayer);
+    if (turnPlayer === username) {
+        startPlayerTurn();
+    }
+});
+
+
+/**
+ * Starts the player's turn, notifying the user that they should select now
+ */
+function startPlayerTurn() {
+    notificationTone.play();
+    playArea.html(`
+        <button class="btn btn-success" onclick="takePoints(1)">Take 1</button>
+        <button class="btn btn-warning" onclick="takePoints(2)">Take 2</button>
+        <button class="btn btn-danger" onclick="takePoints(3)">Take 3</button>
+        <button class="btn btn-primary" onclick="takePoints(0)">Pass</button>
+    `);
+}
+
+
+/**
+ * Changes the displayed turn player in the game window. If the provided player is null, then the area
+ * will just say it is loading.
+ */
+function changeTurnPlayer(playerName) {
+    if (playerName === null) {
+        turnPlayerArea.html("Loading...");
+    }
+    else {
+        turnPlayerArea.html(playerName + "'s turn");
+    }
+}
+
+
+/**
+ * Uses a player's turn to take the given number of points.
+ */
+function takePoints(numPoints) {
+    console.log(numPoints);
+    playArea.html("");
+    changeTurnPlayer(null);
+    socket.emit('turn_taken', {msg: "Turn Taken", pointsTaken: numPoints});
+}
+</script>
+{% endblock %}

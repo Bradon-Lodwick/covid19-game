@@ -1,0 +1,43 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}COVID-19 Team Building Game!{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div>
+    <h1>The COVID-19 Team Building Game!</h1>
+    <p>
+      This game is just a simple game to try and help us feel like we are still together as a team interacting with
+      each other throughout the day :) Please be honest with your username and just use one consistently. I'm not
+      adding security to this since it is just for our team and I wanted to get it out fast lol. Just keep the window
+      open in the background to play, and the window will chime when it is your turn.
+    </p>
+    <h2>How to Play</h2>
+    <p>
+      The goal of the game is to accumulate the most points throughout the day. There will be a set number of points per
+      round that can be taken, and when it is your turn you get to take 1-3 points. you can pass after taking 0, 1, or
+      2. Whoever ends up being the first to take points when there are none left will get a penalty, so be careful!
+      Once you pass to the next player, the server will tell you who you passed on to. The server chooses the next
+      person at random. After a round completes, a delay will be placed before starting the next game so we don't become
+      overly distracted. At the end of the day, we will see who gets the most points!
+    </p>
+    <form id="game-form">
+      <div class="form-group">
+        <label for="username-input">Username</label>
+        <input type="text" id="username-input" class="form-control" name="username" placeholder="Username..." required>
+      </div>
+      <button type="submit" class="btn btn-primary">Start Game</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script type="text/javascript">
+$("#game-form").submit(function(e) {
+  e.preventDefault();
+  let username = $("#username-input").val();
+  window.open(`{{ url_for('game_page') }}?username=${username}`, "Play Game", "height=40, width=302");
+});
+</script>
+{% endblock %}
