@@ -127,6 +127,7 @@ class ButtonRoulette:
         print(f"Stock left: {self.stock}")
         return msg
 
+
     def reset_score(self):
         """
         Resets the score to a random value weighted by the number of active players
